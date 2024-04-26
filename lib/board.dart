@@ -20,6 +20,8 @@ class _RenderBoardState extends State<RenderBoard> {
     super.initState();
   }
 
+  void generateChessPieces() {}
+
   @override
   Widget build(BuildContext context) {
     return Container(

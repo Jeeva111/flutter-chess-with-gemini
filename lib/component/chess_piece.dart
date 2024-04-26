@@ -1,52 +1,51 @@
 import 'package:flutter/material.dart';
 
-class ClassicChessPiece implements ChessPieceTemplate {
+class ClassicChessPiece extends ChessPieceTemplate {
+  const ClassicChessPiece();
   @override
-  // Black and white piece
-  (
+  final ChessPieceData bishop = (
+    icon: "assets/chess/piece/sample.svg",
+    type: ChessPieceType.bishop
+  );
+
+  @override
+  final (
     Color,
     Color
-  ) get colors => (
-        Colors.white,
-        Colors.black
-      );
+  ) colors = (
+    Colors.white,
+    Colors.black
+  );
 
   @override
-  ChessPieceData get bishop => (
-        type: ChessPieceType.bishop,
-        icon: "assets/piece/sample.svg"
-      );
+  final ChessPieceData king = (
+    icon: "assets/chess/piece/sample.svg",
+    type: ChessPieceType.king
+  );
 
   @override
-  ChessPieceData get king => (
-        type: ChessPieceType.king,
-        icon: "assets/piece/sample.svg"
-      );
+  final ChessPieceData knight = (
+    icon: "assets/chess/piece/sample.svg",
+    type: ChessPieceType.knight
+  );
 
   @override
-  ChessPieceData get knight => (
-        type: ChessPieceType.knight,
-        icon: "assets/piece/sample.svg"
-      );
+  final ChessPieceData pawn = (
+    icon: "assets/chess/piece/sample.svg",
+    type: ChessPieceType.pawn
+  );
 
   @override
-  ChessPieceData get pawn => (
-        type: ChessPieceType.pawn,
-        icon: "assets/piece/sample.svg"
-      );
+  final ChessPieceData queen = (
+    icon: "assets/chess/piece/sample.svg",
+    type: ChessPieceType.queen
+  );
 
   @override
-  ChessPieceData get queen => (
-        type: ChessPieceType.queen,
-        icon: "assets/piece/sample.svg"
-      );
-
-  @override
-  ChessPieceData get rook => (
-        type: ChessPieceType.rook,
-        icon: "assets/piece/sample.svg"
-      );
-  const ClassicChessPiece();
+  final ChessPieceData rook = (
+    icon: "assets/chess/piece/sample.svg",
+    type: ChessPieceType.rook
+  );
 }
 
 typedef ChessPieceData = ({
@@ -55,25 +54,20 @@ typedef ChessPieceData = ({
 });
 
 abstract class ChessPieceTemplate {
-  final (
+  abstract final (
     Color color1,
     Color color2
   ) colors;
-  final ChessPieceData pawn;
-  final ChessPieceData rook;
-  final ChessPieceData knight;
-  final ChessPieceData bishop;
-  final ChessPieceData queen;
-  final ChessPieceData king;
-  const ChessPieceTemplate({
-    required this.pawn,
-    required this.rook,
-    required this.knight,
-    required this.bishop,
-    required this.queen,
-    required this.king,
-    required this.colors,
-  });
+  abstract final ChessPieceData pawn;
+  abstract final ChessPieceData rook;
+  abstract final ChessPieceData knight;
+  abstract final ChessPieceData bishop;
+  abstract final ChessPieceData queen;
+  abstract final ChessPieceData king;
+  const ChessPieceTemplate();
+  List<List<ChessPieceData>> generateChessPiece() {
+    return [];
+  }
 }
 
 enum ChessPieceType {
@@ -86,5 +80,7 @@ enum ChessPieceType {
 }
 
 class ChessPiece {
-  const ChessPiece();
+  static void generateChessPiece(ChessPieceTemplate template) {
+    List<List<ChessPieceData>> list = [];
+  }
 }

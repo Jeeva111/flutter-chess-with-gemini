@@ -14,11 +14,11 @@ class RenderBoard extends StatefulWidget {
 
 class _RenderBoardState extends State<RenderBoard> {
   bool isSelected = false;
-  late ListOfChessPieces chessPiece;
+  late ListOfChessPieces chessPieces;
   @override
   void initState() {
     super.initState();
-    chessPiece = ChessPiece.generateChessPiece(widget.chessPieces);
+    chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
   }
 
   void generateChessPieces() {}
@@ -34,8 +34,8 @@ class _RenderBoardState extends State<RenderBoard> {
         itemBuilder: (context, index) {
           int x = index ~/ Chess.boxes;
           int y = index % Chess.boxes;
-          bool isWhite = (x + y) % 2 == 0;
-          return widget.chessBoard.render(index: index, isColor1: isWhite, isSelected: isSelected, chessPiece: chessPiece[x][y]);
+          bool isOddBox = (x + y) % 2 == 0;
+          return widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: isSelected, chessPiece: chessPieces[x][y]));
         },
       ),
     );

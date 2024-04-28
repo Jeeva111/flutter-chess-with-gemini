@@ -1,11 +1,20 @@
 import 'package:chess/const.dart';
 import 'package:flutter/material.dart';
 
-typedef ChessPieceData = ({
-  ChessPieceType type,
-  String icon,
-  String firstLetter,
-});
+class ChessPieceData {
+  final ChessPieceType type;
+  final String icon;
+  final String firstLetter;
+  Color? color;
+  ChessPieceData({required this.type, required this.icon, required this.firstLetter, this.color = Colors.pink});
+
+  @override
+  String toString() {
+    return "type: $type, icon: $icon, firstLetter: $firstLetter, color: $color";
+  }
+
+  ChessPieceData copyWith(Color color) => ChessPieceData(type: type, icon: icon, firstLetter: firstLetter, color: color);
+}
 
 typedef ListOfChessPieces = List<List<ChessPieceData?>>;
 
@@ -49,61 +58,6 @@ enum ChessPieceType {
   pawn,
 }
 
-class ClassicChessPiece extends ChessPieceTemplate {
-  const ClassicChessPiece();
-
-  @override
-  final (
-    Color,
-    Color
-  ) colors = (
-    Colors.white,
-    Colors.black
-  );
-
-  @override
-  final ChessPieceData bishop = (
-    icon: "assets/chess/pieces/bishop-w.svg",
-    type: ChessPieceType.bishop,
-    firstLetter: 'B'
-  );
-
-  @override
-  final ChessPieceData king = (
-    icon: "assets/chess/pieces/king-w.svg",
-    type: ChessPieceType.king,
-    firstLetter: 'K'
-  );
-
-  @override
-  final ChessPieceData knight = (
-    icon: "assets/chess/pieces/knight-w.svg",
-    type: ChessPieceType.knight,
-    firstLetter: 'N'
-  );
-
-  @override
-  final ChessPieceData pawn = (
-    icon: "assets/chess/pieces/pawn-w.svg",
-    type: ChessPieceType.pawn,
-    firstLetter: 'P'
-  );
-
-  @override
-  final ChessPieceData queen = (
-    icon: "assets/chess/pieces/queen-w.svg",
-    type: ChessPieceType.queen,
-    firstLetter: 'Q'
-  );
-
-  @override
-  final ChessPieceData rook = (
-    icon: "assets/chess/pieces/rook-w.svg",
-    type: ChessPieceType.rook,
-    firstLetter: 'R'
-  );
-}
-
 class ChessPiece {
   static ListOfChessPieces generateChessPiece(ChessPieceTemplate pieces) {
     // Creating spaces in array 8 * 8
@@ -113,16 +67,27 @@ class ChessPiece {
     // Spawn chess pieces
     var listOfPieces = pieces.listOfPieces();
     for (var i = 0; i < listOfPieces.length; i++) {
-      listOfChessPieces[0][i] = listOfPieces[i];
+      ChessPieceData data = listOfPieces[i].copyWith(pieces.colors.$1);
+      listOfChessPieces[0][i] = data;
     }
 
     // Position for pawn
     for (int i = 0; i < Chess.boxes; i++) {
-      listOfChessPieces[1][i] = pieces.pawn;
+      ChessPieceData data = pieces.pawn.copyWith(pieces.colors.$1);
+      listOfChessPieces[1][i] = data;
     }
 
-    listOfChessPieces[Chess.boxes - 1] = List.from(listOfChessPieces[0]);
-    listOfChessPieces[Chess.boxes - 2] = List.from(listOfChessPieces[1]);
+    for (var i = 0; i < listOfPieces.length; i++) {
+      ChessPieceData data = listOfPieces[i].copyWith(pieces.colors.$2);
+      listOfChessPieces[7][i] = data;
+    }
+
+    // // Position for pawn
+    for (int i = 0; i < Chess.boxes; i++) {
+      ChessPieceData data = pieces.pawn.copyWith(pieces.colors.$2);
+      listOfChessPieces[6][i] = data;
+    }
+
     return listOfChessPieces;
   }
 }

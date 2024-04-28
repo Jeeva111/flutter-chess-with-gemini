@@ -14,11 +14,14 @@ class RenderBoard extends StatefulWidget {
 
 class _RenderBoardState extends State<RenderBoard> {
   bool isSelected = false;
-  List<List<ChessPieceData?>> chessPiece = List.generate(8, (x) => List.generate(8, (y) => null));
+  late ListOfChessPieces chessPiece;
   @override
   void initState() {
     super.initState();
+    chessPiece = ChessPiece.generateChessPiece(widget.chessPieces);
   }
+
+  void generateChessPieces() {}
 
   @override
   Widget build(BuildContext context) {

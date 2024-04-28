@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 abstract class ChessBoard {
-  final ({
+  abstract final ({
     Color color1,
     Color color2
   }) boxColor;
-  const ChessBoard({required this.boxColor});
+  const ChessBoard();
   Widget render({required int index, required bool isColor1, required bool isSelected, ChessPieceData? chessPiece});
 }
 

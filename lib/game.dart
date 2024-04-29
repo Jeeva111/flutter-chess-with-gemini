@@ -1,7 +1,7 @@
 import 'package:chess/board.dart';
 import 'package:chess/boards/classic_board.dart';
-import 'package:chess/component/chess_board.dart';
-import 'package:chess/component/chess_piece.dart';
+import 'package:chess/boards/chess_board.dart';
+import 'package:chess/pieces/chess_piece.dart';
 import 'package:chess/const.dart';
 import 'package:chess/pieces/classic_piece.dart';
 import 'package:flutter/material.dart';

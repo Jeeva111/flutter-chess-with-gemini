@@ -1,5 +1,5 @@
-import 'package:chess/component/chess_board.dart';
-import 'package:chess/component/chess_piece.dart';
+import 'package:chess/boards/chess_board.dart';
+import 'package:chess/pieces/chess_piece.dart';
 import 'package:chess/const.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +15,13 @@ class RenderBoard extends StatefulWidget {
 class _RenderBoardState extends State<RenderBoard> {
   bool isSelected = false;
   late ListOfChessPieces chessPieces;
+  ({
+    int x,
+    int y
+  }) selectedPiece = (
+    x: -1,
+    y: -1
+  );
   @override
   void initState() {
     super.initState();
@@ -35,7 +42,16 @@ class _RenderBoardState extends State<RenderBoard> {
           int x = index ~/ Chess.boxes;
           int y = index % Chess.boxes;
           bool isOddBox = (x + y) % 2 == 0;
-          return widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: isSelected, chessPiece: chessPieces[x][y]));
+          return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedPiece = (
+                    x: x,
+                    y: y
+                  );
+                });
+              },
+              child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiece.x == x && selectedPiece.y == y, chessPiece: chessPieces[x][y])));
         },
       ),
     );

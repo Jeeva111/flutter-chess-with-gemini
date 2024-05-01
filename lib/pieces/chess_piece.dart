@@ -6,14 +6,15 @@ class ChessPieceData {
   final String icon;
   final String firstLetter;
   Color? color;
-  ChessPieceData({required this.type, required this.icon, required this.firstLetter, this.color = Colors.pink});
+  bool isPlayer1;
+  ChessPieceData({required this.type, required this.icon, required this.firstLetter, this.color = Colors.pink, this.isPlayer1 = true});
 
   @override
   String toString() {
-    return "type: $type, icon: $icon, firstLetter: $firstLetter, color: $color";
+    return "type: $type, icon: $icon, firstLetter: $firstLetter, color: $color, isPlayer1: $isPlayer1";
   }
 
-  ChessPieceData copyWith(Color color) => ChessPieceData(type: type, icon: icon, firstLetter: firstLetter, color: color);
+  ChessPieceData copyWith(Color color, [bool isPlayer1 = true]) => ChessPieceData(type: type, icon: icon, firstLetter: firstLetter, color: color, isPlayer1: isPlayer1);
 }
 
 typedef ListOfChessPieces = List<List<ChessPieceData?>>;
@@ -69,7 +70,7 @@ class ChessPiece {
     for (var i = 0; i < listOfPieces.length; i++) {
       ChessPieceData player1 = listOfPieces[i].copyWith(pieces.colors.$1);
       listOfChessPieces[0][i] = player1;
-      ChessPieceData player2 = listOfPieces[i].copyWith(pieces.colors.$2);
+      ChessPieceData player2 = listOfPieces[i].copyWith(pieces.colors.$2, false);
       listOfChessPieces[7][i] = player2;
     }
 
@@ -77,7 +78,7 @@ class ChessPiece {
     for (int i = 0; i < Chess.boxes; i++) {
       ChessPieceData player1 = pieces.pawn.copyWith(pieces.colors.$1);
       listOfChessPieces[1][i] = player1;
-      ChessPieceData player2 = pieces.pawn.copyWith(pieces.colors.$2);
+      ChessPieceData player2 = pieces.pawn.copyWith(pieces.colors.$2, false);
       listOfChessPieces[6][i] = player2;
     }
 

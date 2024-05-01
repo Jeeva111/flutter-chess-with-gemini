@@ -6,9 +6,14 @@ class ClassicBoard implements ChessBoard {
 
   @override
   Widget render(ChessBoardRenderParams params) {
-    Color currBoxColor = params.isSelected ? boxColor.selectedColor : (params.isOddBox ? boxColor.box1 : boxColor.box2);
-    return ColoredBox(
-      color: currBoxColor,
+    Color currBoxColor = (params.isOddBox ? boxColor.box1 : boxColor.box2);
+    if (params.isSelected) {
+      currBoxColor = boxColor.selectedColor;
+    } else if (params.isValidMove) {
+      currBoxColor = Colors.greenAccent;
+    }
+    return Container(
+      decoration: BoxDecoration(border: const Border(right: BorderSide(color: Colors.black), bottom: BorderSide(color: Colors.black)), color: currBoxColor),
       child: drawChessPiece(params.chessPiece?.icon, params.chessPiece?.color),
     );
   }
@@ -19,8 +24,8 @@ class ClassicBoard implements ChessBoard {
     Color box2,
     Color selectedColor
   }) get boxColor => (
-        box1: Colors.blueGrey,
-        box2: Colors.blueAccent,
-        selectedColor: Colors.yellow
+        box1: Colors.black54,
+        box2: Colors.lightBlue,
+        selectedColor: Colors.green
       );
 }

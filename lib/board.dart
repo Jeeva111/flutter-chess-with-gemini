@@ -1,7 +1,14 @@
+import 'package:chess/component/vector2.dart';
+import 'package:chess/pieces/classic_piece.dart';
+import 'package:flutter/material.dart';
+
 import 'package:chess/boards/chess_board.dart';
 import 'package:chess/pieces/chess_piece.dart';
 import 'package:chess/const.dart';
-import 'package:flutter/material.dart';
+
+typedef ListOfMoves = List<List<int>>;
+
+Vector2 vector2InitPos() => Vector2.init();
 
 class RenderBoard extends StatefulWidget {
   final ChessBoard chessBoard;
@@ -15,20 +22,58 @@ class RenderBoard extends StatefulWidget {
 class _RenderBoardState extends State<RenderBoard> {
   bool isSelected = false;
   late ListOfChessPieces chessPieces;
-  ({
-    int x,
-    int y
-  }) selectedPiece = (
-    x: -1,
-    y: -1
-  );
+  Vector2 selectedPiecePos = vector2InitPos();
   @override
   void initState() {
     super.initState();
     chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
+    chessPieces[5][3] = ClassicChessPiece().pawn;
   }
 
-  void generateChessPieces() {}
+  List<Vector2> validMoves = [];
+
+  bool isInBoard(Vector2 coords) => (coords.x >= 0 && coords.x < 8) && (coords.y >= 0 && coords.y < 8);
+
+  // Calculate raw valid moves
+  List<Vector2> calculateRawValidMoves(Vector2 coords, ChessPieceData piece) {
+    List<Vector2> candidateMoves = [];
+    int direction = piece.isPlayer1 ? 1 : -1;
+
+    switch (piece.type) {
+      case ChessPieceType.rook:
+      // TODO: Handle this case.
+      case ChessPieceType.knight:
+      // TODO: Handle this case.
+      case ChessPieceType.bishop:
+      // TODO: Handle this case.
+      case ChessPieceType.queen:
+      // TODO: Handle this case.
+      case ChessPieceType.king:
+      // TODO: Handle this case.
+      case ChessPieceType.pawn:
+
+        // pawns can move forward
+        if (isInBoard(coords.addX(direction)) && chessPieces[coords.x + direction][coords.y] == null) {
+          candidateMoves.add(coords.addX(direction));
+        }
+        // if pawn first move check two boxes is valid
+        if ((coords.x == 1 && piece.isPlayer1) || (coords.x == 6 && !piece.isPlayer1)) {
+          if (isInBoard(coords.addX((2 * direction))) && chessPieces[coords.x + (2 * direction)][coords.y] == null && chessPieces[coords.x + direction][coords.y] == null) {
+            candidateMoves.add(coords.addX(2 * direction));
+          }
+        }
+        // check is there any piece diagonally to kill 🔪 left side
+        if (isInBoard(coords.addXY(direction, -1)) && chessPieces[coords.x + direction][coords.y - 1] != null && chessPieces[coords.x + direction][coords.y - 1]!.isPlayer1) {
+          candidateMoves.add(coords.addXY(direction, -1));
+        }
+
+        // check is there any piece diagonally to kill 🔪 right side
+        if (isInBoard(coords.addXY(direction, 1)) && chessPieces[coords.x + direction][coords.y + 1] != null && chessPieces[coords.x + direction][coords.y + 1]!.isPlayer1) {
+          candidateMoves.add(coords.addXY(direction, 1));
+        }
+    }
+    return candidateMoves;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,16 +87,29 @@ class _RenderBoardState extends State<RenderBoard> {
           int x = index ~/ Chess.boxes;
           int y = index % Chess.boxes;
           bool isOddBox = (x + y) % 2 == 0;
+
+          bool isValidMove = false;
+          for (var pos in validMoves) {
+            if (pos.x == x && pos.y == y) {
+              isValidMove = true;
+            }
+          }
           return GestureDetector(
               onTap: () {
-                setState(() {
-                  selectedPiece = (
-                    x: x,
-                    y: y
-                  );
-                });
+                if (chessPieces[x][y] != null) {
+                  setState(() {
+                    selectedPiecePos = Vector2(x, y);
+                    // selectedPiece = (
+                    //   x: x,
+                    //   y: y
+                    // );
+                  });
+
+                  // if a piece is selected, calculate valid moves
+                  validMoves = calculateRawValidMoves(selectedPiecePos, chessPieces[x][y]!);
+                }
               },
-              child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiece.x == x && selectedPiece.y == y, chessPiece: chessPieces[x][y])));
+              child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiecePos.x == x && selectedPiecePos.y == y, chessPiece: chessPieces[x][y], isValidMove: isValidMove)));
         },
       ),
     );

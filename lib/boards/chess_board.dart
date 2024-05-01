@@ -6,11 +6,13 @@ interface class ChessBoardRenderParams {
   final int index;
   final bool isOddBox;
   final bool isSelected;
+  final bool isValidMove;
   final ChessPieceData? chessPiece;
   const ChessBoardRenderParams({
     required this.index,
     required this.isOddBox,
     required this.isSelected,
+    required this.isValidMove,
     this.chessPiece,
   });
 }

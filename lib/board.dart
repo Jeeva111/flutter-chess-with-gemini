@@ -1,5 +1,4 @@
 import 'package:chess/component/vector2.dart';
-import 'package:chess/pieces/classic_piece.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chess/boards/chess_board.dart';
@@ -22,12 +21,12 @@ class RenderBoard extends StatefulWidget {
 class _RenderBoardState extends State<RenderBoard> {
   bool isSelected = false;
   late ListOfChessPieces chessPieces;
+  ChessPieceData? selectedPiece;
   Vector2 selectedPiecePos = vector2InitPos();
   @override
   void initState() {
     super.initState();
     chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
-    chessPieces[5][3] = ClassicChessPiece().knight;
   }
 
   List<Vector2> validMoves = [];
@@ -96,16 +95,91 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.bishop:
-        // TODO: Handle this case.
+        List<List<int>> directions = [
+          [ -1, -1 ], //up
+          [ 1, 1 ], //down
+          [ 1, -1 ], //left
+          [ -1, 1 ], //right
+        ];
+        for (List<int> dir in directions) {
+          var i = 1;
+          for (;;) {
+            var newRow = coords.x + i * dir[0];
+            var newCol = coords.y + i * dir[1];
+            var newVector = Vector2(newRow, newCol);
+            if (!isInBoard(newVector)) {
+              break;
+            }
+            if (chessPieces[newRow][newCol] != null) {
+              if (chessPieces[newRow][newCol]!.isPlayer1 != piece.isPlayer1) {
+                candidateMoves.add(newVector);
+              }
+              break;
+            }
+            candidateMoves.add(newVector);
+            i++;
+          }
+        }
         break;
       case ChessPieceType.queen:
-        // TODO: Handle this case.
+        List<List<int>> directions = [
+          [ -1, -1 ],
+          [ -1, 1],
+          [ -1, 0 ],
+          [ 0, -1 ],
+          [ 0, 1 ],
+          [ 1, -1],
+          [ 1, 1 ],
+          [ 1, 0 ],
+        ];
+        for (List<int> dir in directions) {
+          var i = 1;
+          for (;;) {
+            var newRow = coords.x + i * dir[0];
+            var newCol = coords.y + i * dir[1];
+            var newVector = Vector2(newRow, newCol);
+            if (!isInBoard(newVector)) {
+              break;
+            }
+            if (chessPieces[newRow][newCol] != null) {
+              if (chessPieces[newRow][newCol]!.isPlayer1 != piece.isPlayer1) {
+                candidateMoves.add(newVector);
+              }
+              break;
+            }
+            candidateMoves.add(newVector);
+            i++;
+          }
+        }
         break;
       case ChessPieceType.king:
-        // TODO: Handle this case.
+        List<List<int>> directions = [
+          [ -1, 0 ],
+          [ 1, 0 ],
+          [ 0, -1 ],
+          [ 0, 1 ],
+          [ -1, -1 ],
+          [ -1, 1 ],
+          [ 1, -1 ],
+          [ 1, 1 ],
+        ];
+        for (List<int> dir in directions) {
+            var newRow = coords.x + dir[0];
+            var newCol = coords.y + dir[1];
+            var newVector = Vector2(newRow, newCol);
+            if (!isInBoard(newVector)) {
+              continue;
+            }
+            if (chessPieces[newRow][newCol] != null) {
+              if (chessPieces[newRow][newCol]!.isPlayer1 != piece.isPlayer1) {
+                candidateMoves.add(newVector);
+              }
+              continue;
+            }
+            candidateMoves.add(newVector);
+        }
         break;
       case ChessPieceType.pawn:
-
         // pawns can move forward
         if (isInBoard(coords.addX(direction)) && chessPieces[coords.x + direction][coords.y] == null) {
           candidateMoves.add(coords.addX(direction));
@@ -126,9 +200,35 @@ class _RenderBoardState extends State<RenderBoard> {
           candidateMoves.add(coords.addXY(direction, 1));
         }
     }
+    
     return candidateMoves;
   }
 
+  void movePiece(Vector2 coords) {
+    chessPieces[coords.x][coords.y] = selectedPiece;
+    chessPieces[selectedPiecePos.x][selectedPiecePos.y] = null;
+
+    setState(() {
+        selectedPiece = null;
+        selectedPiecePos.x = -1;
+        selectedPiecePos.y = -1;
+        validMoves = [];
+    });
+  }
+
+  void pieceSelected(Vector2 coords) {
+    setState(() {
+      if(chessPieces[coords.x][coords.y] != null) {
+        selectedPiece = chessPieces[coords.x][coords.y];
+        selectedPiecePos = coords;
+      } else if(selectedPiece != null && validMoves.any((Vector2 element) => element.x == coords.x && element.y == coords.y)) {
+        movePiece(coords);
+      }
+      // if a piece is selected, calculate valid moves
+      validMoves = calculateRawValidMoves(selectedPiecePos, chessPieces[coords.x][coords.y]!);
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -150,31 +250,11 @@ class _RenderBoardState extends State<RenderBoard> {
           }
           return GestureDetector(
               onTap: () {
-                if (chessPieces[x][y] != null) {
-                  setState(() {
-                    selectedPiecePos = Vector2(x, y);
-                  });
-
-                  // if a piece is selected, calculate valid moves
-                  validMoves = calculateRawValidMoves(selectedPiecePos, chessPieces[x][y]!);
-                }
+                pieceSelected(Vector2(x, y));
               },
               child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiecePos.x == x && selectedPiecePos.y == y, chessPiece: chessPieces[x][y], isValidMove: isValidMove)));
         },
       ),
     );
   }
-}
-
-bool indexExists(List<List<dynamic>> arr, int row, int col) {
-  // Check if the row index is within bounds
-  if (row < 0 || row >= arr.length) {
-    return false;
-  }
-  // Check if the column index is within bounds
-  if (col < 0 || col >= arr[row].length) {
-    return false;
-  }
-  // Both row and column indices are within bounds
-  return true;
 }

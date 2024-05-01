@@ -27,7 +27,7 @@ class _RenderBoardState extends State<RenderBoard> {
   void initState() {
     super.initState();
     chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
-    chessPieces[5][3] = ClassicChessPiece().pawn;
+    chessPieces[5][3] = ClassicChessPiece().knight;
   }
 
   List<Vector2> validMoves = [];
@@ -41,15 +41,69 @@ class _RenderBoardState extends State<RenderBoard> {
 
     switch (piece.type) {
       case ChessPieceType.rook:
-      // TODO: Handle this case.
+        // Horizontal and vertical direction
+        List<List<int>> directions = [
+          [ -1, 0 ], //up
+          [ 1, 0 ], //down
+          [ 0, -1 ], //left
+          [ 0, 1 ], //right
+        ];
+        for (List<int> dir in directions) {
+          var i = 1;
+          for (;;) {
+            var newRow = coords.x + i * dir[0];
+            var newCol = coords.y + i * dir[1];
+            var newVector = Vector2(newRow, newCol);
+            if (!isInBoard(newVector)) {
+              break;
+            }
+            if (chessPieces[newRow][newCol] != null) {
+              if (chessPieces[newRow][newCol]!.isPlayer1 != piece.isPlayer1) {
+                candidateMoves.add(newVector);
+              }
+              break;
+            }
+            candidateMoves.add(newVector);
+            i++;
+          }
+        }
+        break;
       case ChessPieceType.knight:
-      // TODO: Handle this case.
+        List<List<int>> directions = [
+          [ -2, -1 ],
+          [ -2, 1 ],
+          [ -1, -2 ],
+          [ -1, 2],
+          [ 1, -2],
+          [ 1, 2 ],
+          [ 2, -1 ],
+          [ 2, 1 ],
+        ];
+        for (List<int> dir in directions) {
+            var newRow = coords.x + dir[0];
+            var newCol = coords.y + dir[1];
+            var newVector = Vector2(newRow, newCol);
+            if (!isInBoard(newVector)) {
+              continue;
+            }
+            if (chessPieces[newRow][newCol] != null) {
+              if (chessPieces[newRow][newCol]!.isPlayer1 != piece.isPlayer1) {
+                candidateMoves.add(newVector);
+              }
+              continue;
+            }
+            candidateMoves.add(newVector);
+        }
+        break;
       case ChessPieceType.bishop:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
+        break;
       case ChessPieceType.queen:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
+        break;
       case ChessPieceType.king:
-      // TODO: Handle this case.
+        // TODO: Handle this case.
+        break;
       case ChessPieceType.pawn:
 
         // pawns can move forward
@@ -99,10 +153,6 @@ class _RenderBoardState extends State<RenderBoard> {
                 if (chessPieces[x][y] != null) {
                   setState(() {
                     selectedPiecePos = Vector2(x, y);
-                    // selectedPiece = (
-                    //   x: x,
-                    //   y: y
-                    // );
                   });
 
                   // if a piece is selected, calculate valid moves

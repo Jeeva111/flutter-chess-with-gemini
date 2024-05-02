@@ -19,9 +19,9 @@ interface class ChessBoardRenderParams {
 
 abstract class ChessBoard {
   abstract final ({
-    Color box1,
-    Color box2,
-    Color selectedColor
+    Color? box1,
+    Color? box2,
+    Color? selectedColor
   }) boxColor;
   const ChessBoard();
   Widget render(ChessBoardRenderParams params);

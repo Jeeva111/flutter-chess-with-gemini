@@ -23,6 +23,13 @@ class _RenderBoardState extends State<RenderBoard> {
   late ListOfChessPieces chessPieces;
   ChessPieceData? selectedPiece;
   Vector2 selectedPiecePos = vector2InitPos();
+
+  // A list of white pieces killed by player 2
+  List<ChessPieceData> killedWhitePieces = [];
+
+  // A list of black pieces killed by player 1
+  List<ChessPieceData> killedBlackPieces = [];
+
   @override
   void initState() {
     super.initState();
@@ -34,12 +41,16 @@ class _RenderBoardState extends State<RenderBoard> {
   bool isInBoard(Vector2 coords) => (coords.x >= 0 && coords.x < 8) && (coords.y >= 0 && coords.y < 8);
 
   // Calculate raw valid moves
-  List<Vector2> calculateRawValidMoves(Vector2 coords, ChessPieceData piece) {
+  List<Vector2> calculateRawValidMoves(Vector2 coords, ChessPieceData? piece) {
     List<Vector2> candidateMoves = [];
+    if(piece == null) {
+      return candidateMoves;
+    }
     int direction = piece.isPlayer1 ? 1 : -1;
-
+    
     switch (piece.type) {
       case ChessPieceType.rook:
+        debugPrint(ChessPieceType.rook.toString());
         // Horizontal and vertical direction
         List<List<int>> directions = [
           [ -1, 0 ], //up
@@ -68,6 +79,7 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.knight:
+      debugPrint(ChessPieceType.knight.toString());
         List<List<int>> directions = [
           [ -2, -1 ],
           [ -2, 1 ],
@@ -95,6 +107,7 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.bishop:
+        debugPrint(ChessPieceType.bishop.toString());
         List<List<int>> directions = [
           [ -1, -1 ], //up
           [ 1, 1 ], //down
@@ -122,6 +135,7 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.queen:
+        debugPrint(ChessPieceType.queen.toString());
         List<List<int>> directions = [
           [ -1, -1 ],
           [ -1, 1],
@@ -153,6 +167,7 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.king:
+        debugPrint(ChessPieceType.king.toString());
         List<List<int>> directions = [
           [ -1, 0 ],
           [ 1, 0 ],
@@ -180,6 +195,7 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.pawn:
+        debugPrint(ChessPieceType.pawn.toString());
         // pawns can move forward
         if (isInBoard(coords.addX(direction)) && chessPieces[coords.x + direction][coords.y] == null) {
           candidateMoves.add(coords.addX(direction));
@@ -200,11 +216,21 @@ class _RenderBoardState extends State<RenderBoard> {
           candidateMoves.add(coords.addXY(direction, 1));
         }
     }
-    
     return candidateMoves;
   }
 
   void movePiece(Vector2 coords) {
+
+    // if the new place has an enemy piece
+    if(chessPieces[coords.x][coords.y] != null) {
+      var capturedPiece = chessPieces[coords.x][coords.y];
+      if(capturedPiece!.isPlayer1) {
+        killedWhitePieces.add(capturedPiece);
+      } else {
+        killedBlackPieces.add(capturedPiece);
+      }
+    }
+
     chessPieces[coords.x][coords.y] = selectedPiece;
     chessPieces[selectedPiecePos.x][selectedPiecePos.y] = null;
 
@@ -214,19 +240,25 @@ class _RenderBoardState extends State<RenderBoard> {
         selectedPiecePos.y = -1;
         validMoves = [];
     });
+
   }
 
   void pieceSelected(Vector2 coords) {
-    setState(() {
-      if(chessPieces[coords.x][coords.y] != null) {
+
+    setState(() {      
+      if(selectedPiece == null && chessPieces[coords.x][coords.y] != null) {
+        selectedPiece = chessPieces[coords.x][coords.y];
+        selectedPiecePos = coords;
+      } else if(chessPieces[coords.x][coords.y] != null && chessPieces[coords.x][coords.y]!.isPlayer1 == selectedPiece!.isPlayer1) {
         selectedPiece = chessPieces[coords.x][coords.y];
         selectedPiecePos = coords;
       } else if(selectedPiece != null && validMoves.any((Vector2 element) => element.x == coords.x && element.y == coords.y)) {
         movePiece(coords);
       }
       // if a piece is selected, calculate valid moves
-      validMoves = calculateRawValidMoves(selectedPiecePos, chessPieces[coords.x][coords.y]!);
+      validMoves = calculateRawValidMoves(selectedPiecePos, selectedPiece);
     });
+
   }
   
   @override

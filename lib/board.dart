@@ -30,6 +30,15 @@ class _RenderBoardState extends State<RenderBoard> {
   // A list of black pieces killed by player 1
   List<ChessPieceData> killedBlackPieces = [];
 
+  // A boolean to indicate whose turn it is
+  bool isWhiteTrun = true;
+
+  // initial position of king
+  List<int> whitekingPos = [ 0, 4 ];
+  List<int> blackKingPos = [ 7, 4];
+  bool checkStatus = false;
+
+
   @override
   void initState() {
     super.initState();
@@ -207,12 +216,12 @@ class _RenderBoardState extends State<RenderBoard> {
           }
         }
         // check is there any piece diagonally to kill 🔪 left side
-        if (isInBoard(coords.addXY(direction, -1)) && chessPieces[coords.x + direction][coords.y - 1] != null && chessPieces[coords.x + direction][coords.y - 1]!.isPlayer1) {
+        if (isInBoard(coords.addXY(direction, -1)) && chessPieces[coords.x + direction][coords.y - 1] != null && chessPieces[coords.x + direction][coords.y - 1]!.isPlayer1 != piece.isPlayer1) {
           candidateMoves.add(coords.addXY(direction, -1));
         }
 
         // check is there any piece diagonally to kill 🔪 right side
-        if (isInBoard(coords.addXY(direction, 1)) && chessPieces[coords.x + direction][coords.y + 1] != null && chessPieces[coords.x + direction][coords.y + 1]!.isPlayer1) {
+        if (isInBoard(coords.addXY(direction, 1)) && chessPieces[coords.x + direction][coords.y + 1] != null && chessPieces[coords.x + direction][coords.y + 1]!.isPlayer1 != piece.isPlayer1) {
           candidateMoves.add(coords.addXY(direction, 1));
         }
     }
@@ -234,6 +243,9 @@ class _RenderBoardState extends State<RenderBoard> {
     chessPieces[coords.x][coords.y] = selectedPiece;
     chessPieces[selectedPiecePos.x][selectedPiecePos.y] = null;
 
+    // see if any kings are under attack
+    checkStatus = isKingInCheck(!isWhiteTrun) ? true : false;
+
     setState(() {
         selectedPiece = null;
         selectedPiecePos.x = -1;
@@ -241,14 +253,40 @@ class _RenderBoardState extends State<RenderBoard> {
         validMoves = [];
     });
 
+    // change turns to player 2
+    isWhiteTrun = !isWhiteTrun;
+
+  }
+
+  bool isKingInCheck(bool isWhiteKing) {
+    List<int> kingPos = isWhiteKing ? whitekingPos : blackKingPos;
+    
+    // check if any enemy piece can attack the king
+    for(int i = 0; i < 8; i++) {
+      for( int j = 0; j < 8; j++) {
+        if(chessPieces[i][j] == null || chessPieces[i][j]!.isPlayer1 == isWhiteKing) {
+          continue;
+        }
+
+        List<Vector2> pieceValidMoves = calculateRawValidMoves(Vector2(i, j), chessPieces[i][j]);
+
+        if(pieceValidMoves.any((move) => move.x == kingPos[0] && move.y == kingPos[1])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   void pieceSelected(Vector2 coords) {
 
     setState(() {      
       if(selectedPiece == null && chessPieces[coords.x][coords.y] != null) {
-        selectedPiece = chessPieces[coords.x][coords.y];
-        selectedPiecePos = coords;
+        if(chessPieces[coords.x][coords.y]!.isPlayer1 == isWhiteTrun) {
+          selectedPiece = chessPieces[coords.x][coords.y];
+          selectedPiecePos = coords;
+        }
       } else if(chessPieces[coords.x][coords.y] != null && chessPieces[coords.x][coords.y]!.isPlayer1 == selectedPiece!.isPlayer1) {
         selectedPiece = chessPieces[coords.x][coords.y];
         selectedPiecePos = coords;
@@ -263,6 +301,7 @@ class _RenderBoardState extends State<RenderBoard> {
   
   @override
   Widget build(BuildContext context) {
+    print(checkStatus ? "check" : "no check");
     return Container(
       decoration: BoxDecoration(border: Border.all()),
       child: GridView.builder(

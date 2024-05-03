@@ -31,23 +31,34 @@ class _RenderBoardState extends State<RenderBoard> {
   List<ChessPieceData> killedBlackPieces = [];
 
   // A boolean to indicate whose turn it is
-  bool isWhiteTrun = true;
+  bool isWhiteTurn = true;
 
   // initial position of king
-  List<int> whitekingPos = [ 0, 4 ];
-  List<int> blackKingPos = [ 7, 4];
+  Vector2 whitekingPos = Vector2.init();
+  Vector2 blackKingPos = Vector2.init();
   bool checkStatus = false;
 
 
   @override
   void initState() {
     super.initState();
-    chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
+    _intializeBoard();
   }
 
   List<Vector2> validMoves = [];
 
   bool isInBoard(Vector2 coords) => (coords.x >= 0 && coords.x < 8) && (coords.y >= 0 && coords.y < 8);
+
+  void _intializeBoard() {
+    chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
+    checkStatus = false;
+    killedWhitePieces.clear();
+    killedBlackPieces.clear();
+    resetKingPos();
+    setState(() {
+      
+    });
+  }
 
   // Calculate raw valid moves
   List<Vector2> calculateRawValidMoves(Vector2 coords, ChessPieceData? piece) {
@@ -228,6 +239,63 @@ class _RenderBoardState extends State<RenderBoard> {
     return candidateMoves;
   }
 
+  List<Vector2> calculateValidMoves(Vector2 pos, ChessPieceData? piece, bool checkSimulation) {
+    List<Vector2> validMoves = [];
+    List<Vector2> candidateMoves = calculateRawValidMoves(pos, piece);
+
+    if(checkSimulation) {
+      for(var move in candidateMoves) {
+        if(piece != null && simulationMoveSafe(piece, pos, move)) {
+          validMoves.add(move);
+        }
+      }
+    } else {
+      validMoves = candidateMoves;
+    }
+    return validMoves;
+  }
+
+  bool simulationMoveSafe(ChessPieceData piece, Vector2 startPos, Vector2 endPos) {
+    // Save the current board state
+    ChessPieceData? originalDestinationPiece = chessPieces[endPos.x][endPos.y];
+
+    // if the piece is the king, save it's current position and update
+    Vector2? originalKingPos;
+    if(piece.type == ChessPieceType.king) {
+      originalKingPos = piece.isPlayer1 ? whitekingPos : blackKingPos;
+
+      // update the king position
+      if(piece.isPlayer1) {
+        whitekingPos = endPos;
+      } else {
+        blackKingPos = endPos;
+      }
+    }
+
+    // Simulate the move
+    chessPieces[endPos.x][endPos.y] = piece;
+    chessPieces[startPos.x][startPos.y] = null;
+
+    // Check if king under attack
+    bool kingInCheck = isKingInCheck(piece.isPlayer1);
+
+    // restore board to original state
+    chessPieces[startPos.x][startPos.y] = piece;
+    chessPieces[endPos.x][endPos.y] = originalDestinationPiece;
+
+    // If the piece was the king, restore it original position
+    if(piece.type == ChessPieceType.king && originalKingPos != null) {
+      if(piece.isPlayer1) {
+        whitekingPos = originalKingPos;
+      } else {
+        blackKingPos = originalKingPos;
+      }
+    }
+    // if king is in check = true, means it's not a safe move. safe move = false
+    return !kingInCheck;
+
+  }
+
   void movePiece(Vector2 coords) {
 
     // if the new place has an enemy piece
@@ -243,8 +311,16 @@ class _RenderBoardState extends State<RenderBoard> {
     chessPieces[coords.x][coords.y] = selectedPiece;
     chessPieces[selectedPiecePos.x][selectedPiecePos.y] = null;
 
+    if(selectedPiece!.type == ChessPieceType.king) {
+      if(selectedPiece!.isPlayer1) {
+        whitekingPos = coords.copyWith();
+      } else {
+        blackKingPos = coords.copyWith();
+      }
+    }
+
     // see if any kings are under attack
-    checkStatus = isKingInCheck(!isWhiteTrun) ? true : false;
+    checkStatus = isKingInCheck(!isWhiteTurn) ? true : false;
 
     setState(() {
         selectedPiece = null;
@@ -253,14 +329,32 @@ class _RenderBoardState extends State<RenderBoard> {
         validMoves = [];
     });
 
+    // check if it's check mate
+    if(isCheckMate(!isWhiteTurn)) {
+      showDialog(context: context, builder: (context) => 
+        AlertDialog(title: const Text("Check mate"), 
+        actions: [
+          TextButton(onPressed: resetGame, child: const Text("Play again"))],));
+    }
+
     // change turns to player 2
-    isWhiteTrun = !isWhiteTrun;
+    isWhiteTurn = !isWhiteTurn;
 
   }
 
+  void resetGame() {
+    Navigator.pop(context);
+    _intializeBoard();
+  }
+
+  void resetKingPos() {
+    whitekingPos = Vector2(0, 4);
+    blackKingPos = Vector2(7, 4);
+    isWhiteTurn = true;
+  }
+
   bool isKingInCheck(bool isWhiteKing) {
-    List<int> kingPos = isWhiteKing ? whitekingPos : blackKingPos;
-    
+    Vector2 kingPos = isWhiteKing ? whitekingPos : blackKingPos;
     // check if any enemy piece can attack the king
     for(int i = 0; i < 8; i++) {
       for( int j = 0; j < 8; j++) {
@@ -268,9 +362,8 @@ class _RenderBoardState extends State<RenderBoard> {
           continue;
         }
 
-        List<Vector2> pieceValidMoves = calculateRawValidMoves(Vector2(i, j), chessPieces[i][j]);
-
-        if(pieceValidMoves.any((move) => move.x == kingPos[0] && move.y == kingPos[1])) {
+        List<Vector2> pieceValidMoves = calculateValidMoves(Vector2(i, j), chessPieces[i][j], false);
+        if(pieceValidMoves.any((move) => move.x == kingPos.x && move.y == kingPos.y)) {
           return true;
         }
       }
@@ -283,7 +376,7 @@ class _RenderBoardState extends State<RenderBoard> {
 
     setState(() {      
       if(selectedPiece == null && chessPieces[coords.x][coords.y] != null) {
-        if(chessPieces[coords.x][coords.y]!.isPlayer1 == isWhiteTrun) {
+        if(chessPieces[coords.x][coords.y]!.isPlayer1 == isWhiteTurn) {
           selectedPiece = chessPieces[coords.x][coords.y];
           selectedPiecePos = coords;
         }
@@ -294,14 +387,39 @@ class _RenderBoardState extends State<RenderBoard> {
         movePiece(coords);
       }
       // if a piece is selected, calculate valid moves
-      validMoves = calculateRawValidMoves(selectedPiecePos, selectedPiece);
+      validMoves = calculateValidMoves(selectedPiecePos, selectedPiece, true);
     });
 
   }
   
+  bool isCheckMate(bool isWhiteKing) {
+    // if the king is not in check, then it's not checkmate
+    if(!isKingInCheck(isWhiteKing)) {
+      return false;
+    }
+
+    // if there is at least one legal move for any of the player's pieces, then it's not checkmate
+    for(int i = 0; i < 8; i++) {
+      for(int j = 0; j< 8; j++) {
+        // Skip empty squares and pieces of the other color
+        if(chessPieces[i][j] == null || chessPieces[i][j]!.isPlayer1 != isWhiteKing) {
+          continue;
+        }
+
+        List<Vector2> pieceValidMoves = calculateValidMoves(Vector2(i, j), chessPieces[i][j], true);
+
+        // if this piece has any valid moves, then it's not checkmate
+        if(pieceValidMoves.isNotEmpty) {
+          return false;
+        }
+      }
+    }
+    // if none of the above conditions are met, then there is no legal moves left to make
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(checkStatus ? "check" : "no check");
     return Container(
       decoration: BoxDecoration(border: Border.all()),
       child: GridView.builder(

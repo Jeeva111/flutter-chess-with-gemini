@@ -70,7 +70,6 @@ class _RenderBoardState extends State<RenderBoard> {
     
     switch (piece.type) {
       case ChessPieceType.rook:
-        debugPrint(ChessPieceType.rook.toString());
         // Horizontal and vertical direction
         List<List<int>> directions = [
           [ -1, 0 ], //up
@@ -99,7 +98,6 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.knight:
-      debugPrint(ChessPieceType.knight.toString());
         List<List<int>> directions = [
           [ -2, -1 ],
           [ -2, 1 ],
@@ -127,7 +125,6 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.bishop:
-        debugPrint(ChessPieceType.bishop.toString());
         List<List<int>> directions = [
           [ -1, -1 ], //up
           [ 1, 1 ], //down
@@ -155,7 +152,6 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.queen:
-        debugPrint(ChessPieceType.queen.toString());
         List<List<int>> directions = [
           [ -1, -1 ],
           [ -1, 1],
@@ -187,7 +183,6 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.king:
-        debugPrint(ChessPieceType.king.toString());
         List<List<int>> directions = [
           [ -1, 0 ],
           [ 1, 0 ],
@@ -215,7 +210,6 @@ class _RenderBoardState extends State<RenderBoard> {
         }
         break;
       case ChessPieceType.pawn:
-        debugPrint(ChessPieceType.pawn.toString());
         // pawns can move forward
         if (isInBoard(coords.addX(direction)) && chessPieces[coords.x + direction][coords.y] == null) {
           candidateMoves.add(coords.addX(direction));

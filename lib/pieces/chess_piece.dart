@@ -1,3 +1,4 @@
+import 'package:chess/component/vector2.dart';
 import 'package:chess/const.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +61,8 @@ enum ChessPieceType {
 }
 
 class ChessPiece {
+  static final Map<String, ChessPieceData> _chessPieceKey = {};
+
   static ListOfChessPieces generateChessPiece(ChessPieceTemplate pieces) {
     // Creating spaces in array 8 * 8
     ListOfChessPieces listOfChessPieces = List.generate(Chess.boxes, (x) => List.generate(Chess.boxes, (y) => null));
@@ -84,6 +87,21 @@ class ChessPiece {
 
     return listOfChessPieces;
   }
+  
+  static set chessPieceKey(ChessPieceTemplate datas) {
+    for(var data in datas.listOfPieces()) {
+      _chessPieceKey[data.firstLetter] = data;
+    }
+  }
 
-  static validMoves() {}
+  static ({Vector2 pos, ChessPieceData pieceData})? commandToMove(
+    String command // "Bb4" equals to bishop x = 1 and y = 4
+  ) {
+      List<String> splitCommand = command.split("");
+      ChessPieceData? data = _chessPieceKey[splitCommand[0]];
+      Vector2 coords = Vector2(int.parse(splitCommand[2]), charToInt(splitCommand[1]));
+      return data != null ? (pos: coords, pieceData: data) : null;
+  }
 }
+
+int charToInt(String char) => char.codeUnitAt(0) - 'a'.codeUnitAt(0);

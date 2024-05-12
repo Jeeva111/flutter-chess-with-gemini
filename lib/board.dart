@@ -50,34 +50,16 @@ class _RenderBoardState extends State<RenderBoard> {
   bool isInBoard(Vector2 coords) => (coords.x >= 0 && coords.x < 8) && (coords.y >= 0 && coords.y < 8);
 
   void _intializeBoard() {
-    ChessPiece.chessPieceKey = widget.chessPieces;
     chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
     checkStatus = false;
     killedWhitePieces.clear();
     killedBlackPieces.clear();
     resetKingPos();
-    var moveTo = ChessPiece.commandToMove("Na2");
-    int i = 0;
-    outerLoop:
-    for(var piece in chessPieces) {
-      int j = 0;
-      for(var data in piece) {
-        if(data?.firstLetter == "N") {
-          selectedPiece = data;
-          selectedPiecePos = Vector2(i, j);
-          break outerLoop;
-        }
-        j++;
-      }
-      i++;
-    }
-    if(moveTo != null) {
-      pieceSelected(selectedPiecePos);
-      // selectedPiecePos = moveTo.pos;
-      pieceSelected(moveTo.pos);
-      // movePiece(moveTo.pos);
-    }
-    setState(() {});
+    // if(ChessPiece.commandToMove("Nb0a2") case (start: Vector2 start, move: Vector2 move)) {
+    //   selectedPiece = chessPieces[start.x][start.y];
+    //   selectedPiecePos = start;
+    //   movePiece(move);
+    // }
   }
 
   // Calculate raw valid moves

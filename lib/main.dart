@@ -1,4 +1,4 @@
-import 'package:chess/game.dart';
+import 'package:chess/home.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,7 +17,7 @@ class Game extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ChessGame(),
+      home: const HomeScreen(),
     );
   }
 }

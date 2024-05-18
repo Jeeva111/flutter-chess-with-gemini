@@ -1,3 +1,4 @@
+import 'package:chess/component/vector2.dart';
 import 'package:chess/const.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +61,7 @@ enum ChessPieceType {
 }
 
 class ChessPiece {
+
   static ListOfChessPieces generateChessPiece(ChessPieceTemplate pieces) {
     // Creating spaces in array 8 * 8
     ListOfChessPieces listOfChessPieces = List.generate(Chess.boxes, (x) => List.generate(Chess.boxes, (y) => null));
@@ -81,9 +83,45 @@ class ChessPiece {
       ChessPieceData player2 = pieces.pawn.copyWith(pieces.colors.$2, false);
       listOfChessPieces[6][i] = player2;
     }
-
     return listOfChessPieces;
   }
+  
+  static ({Vector2 start, Vector2 move})? commandToMove(
+    String command // "Nb0a2" equals to bishop x = 1 and y = 4
+  ) {
+      SplitData? splitCommand = moveCommandSplitData(command);
+      if(splitCommand is SplitData) {
+        return (start: splitCommand.startPos, move: splitCommand.movePos);
+      }
+      return null;
+  }
 
-  static validMoves() {}
+  static SplitData? moveCommandSplitData(String move) {
+    SplitData? data;
+    if(move.length < 5 || move.isEmpty) {
+      return null;
+    }
+    List<String> split = move.split("");
+    if(split.length == 5) {
+      return SplitData(pieceName: split[0], startPos: Vector2(int.parse(split[2]), charToInt(split[1])), movePos: Vector2(int.parse(split[4]), charToInt(split[3])));
+    }
+    return data;
+  }
 }
+
+interface class SplitData {
+  final String pieceName;
+  final Vector2 startPos;
+  final Vector2 movePos;
+  const SplitData({
+    required this.pieceName,
+    required this.startPos,
+    required this.movePos
+  });
+
+  @override
+  String toString() => "$pieceName, start: $startPos, move: $movePos";
+    
+}
+
+int charToInt(String char) => char.codeUnitAt(0) - 'a'.codeUnitAt(0);

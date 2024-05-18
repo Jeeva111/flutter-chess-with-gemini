@@ -55,9 +55,11 @@ class _RenderBoardState extends State<RenderBoard> {
     killedWhitePieces.clear();
     killedBlackPieces.clear();
     resetKingPos();
-    setState(() {
-      
-    });
+    // if(ChessPiece.commandToMove("Nb0a2") case (start: Vector2 start, move: Vector2 move)) {
+    //   selectedPiece = chessPieces[start.x][start.y];
+    //   selectedPiecePos = start;
+    //   movePiece(move);
+    // }
   }
 
   // Calculate raw valid moves

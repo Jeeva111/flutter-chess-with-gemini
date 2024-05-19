@@ -1,4 +1,4 @@
-import 'package:chess/home.dart';
+import 'package:chess/routes.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,13 +11,14 @@ class Game extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Chess with Gemini',
       theme: ThemeData(
+        fontFamily: "speed",
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      routerConfig: routers,
     );
   }
 }

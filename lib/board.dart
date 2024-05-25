@@ -416,30 +416,40 @@ class _RenderBoardState extends State<RenderBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(border: Border.all()),
-      child: GridView.builder(
-        shrinkWrap: true,
-        itemCount: Chess.totalBoxes,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-        itemBuilder: (context, index) {
-          int x = index ~/ Chess.boxes;
-          int y = index % Chess.boxes;
-          bool isOddBox = (x + y) % 2 == 0;
-
-          bool isValidMove = false;
-          for (var pos in validMoves) {
-            if (pos.x == x && pos.y == y) {
-              isValidMove = true;
-            }
-          }
-          return GestureDetector(
-              onTap: () {
-                pieceSelected(Vector2(x, y));
-              },
-              child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiecePos.x == x && selectedPiecePos.y == y, chessPiece: chessPieces[x][y], isValidMove: isValidMove)));
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double gridSize = constraints.maxWidth < constraints.maxHeight
+            ? constraints.maxWidth
+            : constraints.maxHeight;
+        return Container(
+          width: gridSize,
+          height: gridSize,
+          color: Colors.transparent,
+          child: GridView.builder(
+            shrinkWrap: true,
+            itemCount: Chess.totalBoxes,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8, childAspectRatio: 1),
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              int x = index ~/ Chess.boxes;
+              int y = index % Chess.boxes;
+              bool isOddBox = (x + y) % 2 == 0;
+        
+              bool isValidMove = false;
+              for (var pos in validMoves) {
+                if (pos.x == x && pos.y == y) {
+                  isValidMove = true;
+                }
+              }
+              return GestureDetector(
+                  onTap: () {
+                    pieceSelected(Vector2(x, y));
+                  },
+                  child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiecePos.x == x && selectedPiecePos.y == y, chessPiece: chessPieces[x][y], isValidMove: isValidMove)));
+            },
+          ),
+        );
+      }
     );
   }
 }

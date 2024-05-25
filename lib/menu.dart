@@ -13,8 +13,8 @@ List<IMenuOption> options = [
   IMenuOption(title: "Play", callback: () {
     routers.goNamed(AppRoutes.game.name);
   }),
-  IMenuOption(title: "Two Players", callback: () => print("hello")),
-  IMenuOption(title: "Options", callback: () {}),
+  // IMenuOption(title: "Two Players", callback: () => print("hello")),
+  // IMenuOption(title: "Options", callback: () {}),
   IMenuOption(title: "Quit", callback: () => SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop')),
 ];
 

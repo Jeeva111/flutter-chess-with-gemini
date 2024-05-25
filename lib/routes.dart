@@ -7,7 +7,7 @@ final routers = GoRouter(
     GoRoute(
       name: AppRoutes.root.name,
       path: AppRoutes.root.name,
-      builder: (context, state) => const MenuScreen(),
+      builder: (context, state) => const ChessGame(),
       routes: [
         GoRoute(
           name: AppRoutes.game.name,

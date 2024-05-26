@@ -421,10 +421,9 @@ class _RenderBoardState extends State<RenderBoard> {
         double gridSize = constraints.maxWidth < constraints.maxHeight
             ? constraints.maxWidth
             : constraints.maxHeight;
-        return Container(
+        return SizedBox(
           width: gridSize,
           height: gridSize,
-          color: Colors.transparent,
           child: GridView.builder(
             shrinkWrap: true,
             itemCount: Chess.totalBoxes,

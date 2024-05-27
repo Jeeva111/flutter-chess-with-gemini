@@ -66,6 +66,7 @@ flutter:
   assets:
     - assets/chess/pieces/
     - assets/menu/
+    - assets/background/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

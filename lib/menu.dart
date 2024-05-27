@@ -1,27 +1,46 @@
+import 'package:chess/const.dart';
 import 'package:chess/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 class IMenuTitle {
   final String title;
   final String image;
   final VoidCallback callback;
-  const IMenuTitle({required this.title, required this.image, required this.callback});
+  const IMenuTitle({required this.title, this.image = "assets/menu/button_empty_5.png", required this.callback});
 }
 
 
 List<IMenuTitle> _titles = [
   IMenuTitle(title: "Play", 
-  image: "assets/menu/button_play.png",
   callback: () {
     routers.goNamed(AppRoutes.game.name);
   }),
   // IMenuOption(title: "Two Players", callback: () => print("hello")),
   // IMenuOption(title: "Options", callback: () {}),
-  // IMenuOption(title: "Quit", callback: () => SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop')),
+  IMenuTitle(title: "Quit", callback: () => SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop')),
 ];
 
-class MenuScreen extends StatelessWidget {
+class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> with SingleTickerProviderStateMixin {
+
+   late AnimationController parallexAnim;
+
+  @override
+  void initState() {
+    parallexAnim = AnimationController(
+        duration: const Duration(milliseconds: 250),
+        vsync: this,
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +63,32 @@ class MenuScreen extends StatelessWidget {
                   ),
             ),
           ),
-          const Spacer()
+          Expanded(
+            child: Flow(delegate: BGParallexEffect(animation: parallexAnim), children: [
+              Image.asset("assets/background/background.png"),
+              Image.asset("assets/background/ground.png"),
+            ],),
+          )
         ],
       )
     );
   }
+}
+
+class BGParallexEffect extends FlowDelegate {
+
+  final Animation<double> animation;
+  BGParallexEffect({required this.animation}) : super(repaint: animation);
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    context.paintChild(0, transform: Matrix4.translation(Vector3(0,10,90)));
+  }
+
+  @override
+  bool shouldRepaint(covariant BGParallexEffect oldDelegate) {
+    return animation != oldDelegate.animation;
+  }
+
 }
 
 class MenuOption extends StatelessWidget {
@@ -57,9 +97,15 @@ class MenuOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: option.callback,
-      child: Image.asset(option.image, fit: BoxFit.contain,)
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        GestureDetector(
+          onTap: option.callback,
+          child: Image.asset(option.image, fit: BoxFit.fitHeight, height: 70,)
+        ),
+        Text(option.title, style: const TextStyle(color: Menu.textColor, fontSize: 20),),
+      ],
     );
   }
 }

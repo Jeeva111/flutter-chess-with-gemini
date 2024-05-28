@@ -1,9 +1,11 @@
 import 'package:chess/component/vector2.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chess/boards/chess_board.dart';
 import 'package:chess/pieces/chess_piece.dart';
 import 'package:chess/const.dart';
+import 'package:flutter/services.dart';
 
 typedef ListOfMoves = List<List<int>>;
 
@@ -442,6 +444,7 @@ class _RenderBoardState extends State<RenderBoard> {
               }
               return GestureDetector(
                   onTap: () {
+                    FlameAudio.play("place.mp3");
                     pieceSelected(Vector2(x, y));
                   },
                   child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiecePos.x == x && selectedPiecePos.y == y, chessPiece: chessPieces[x][y], isValidMove: isValidMove)));

@@ -1,4 +1,3 @@
-import 'package:chess/const.dart';
 import 'package:chess/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,16 +96,20 @@ class MenuOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return GestureDetector(
+          onTap: option.callback,
+          child: Stack(
       alignment: Alignment.center,
       children: [
-        GestureDetector(
-          onTap: option.callback,
-          child: Image.asset(option.image, fit: BoxFit.fitHeight, height: 70,)
-        ),
-        Text(option.title, style: const TextStyle(color: Menu.textColor, fontSize: 20),),
+        Image.asset(option.image, fit: BoxFit.fitHeight, height: 70,),
+        Text(option.title, style: const TextStyle(
+          color:Color.fromARGB(239, 255, 215, 116), 
+          fontSize: 18, 
+          shadows: [
+            Shadow(color: Colors.black, offset: Offset(1, 1))
+          ]),)
       ],
-    );
+    ));
   }
 }
 

@@ -1,6 +1,7 @@
-import 'package:chess/game.dart';
+import 'package:chess/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const Game());
@@ -26,13 +27,15 @@ class Game extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    return MaterialApp.router(
       title: 'Chess with Gemini',
       theme: ThemeData(
+        fontFamily: "speed",
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ChessGame(),
+      routerConfig: routers,
     );
   }
 }

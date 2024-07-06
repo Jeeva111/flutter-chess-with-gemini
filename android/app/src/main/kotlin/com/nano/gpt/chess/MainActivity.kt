@@ -1,4 +1,4 @@
-package com.gpt.chess.chess
+package com.nano.gpt.chess
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:chess/boards/chess_board.dart';
 import 'package:chess/pieces/chess_piece.dart';
 import 'package:chess/const.dart';
-import 'package:flutter/services.dart';
 
 typedef ListOfMoves = List<List<int>>;
 
@@ -57,11 +56,11 @@ class _RenderBoardState extends State<RenderBoard> {
     killedWhitePieces.clear();
     killedBlackPieces.clear();
     resetKingPos();
-    // if(ChessPiece.commandToMove("Nb0a2") case (start: Vector2 start, move: Vector2 move)) {
-    //   selectedPiece = chessPieces[start.x][start.y];
-    //   selectedPiecePos = start;
-    //   movePiece(move);
-    // }
+    if(ChessPiece.commandToMove("Nb0a2") case (start: Vector2 start, move: Vector2 move)) {
+      selectedPiece = chessPieces[start.x][start.y];
+      selectedPiecePos = start;
+      movePiece(move);
+    }
   }
 
   // Calculate raw valid moves
@@ -337,6 +336,7 @@ class _RenderBoardState extends State<RenderBoard> {
 
     // change turns to player 2
     isWhiteTurn = !isWhiteTurn;
+    FlameAudio.play("place.mp3");
 
   }
 
@@ -377,10 +377,12 @@ class _RenderBoardState extends State<RenderBoard> {
         if(chessPieces[coords.x][coords.y]!.isPlayer1 == isWhiteTurn) {
           selectedPiece = chessPieces[coords.x][coords.y];
           selectedPiecePos = coords;
+          FlameAudio.play("pick.mp3");
         }
       } else if(chessPieces[coords.x][coords.y] != null && chessPieces[coords.x][coords.y]!.isPlayer1 == selectedPiece!.isPlayer1) {
         selectedPiece = chessPieces[coords.x][coords.y];
         selectedPiecePos = coords;
+        FlameAudio.play("pick.mp3");
       } else if(selectedPiece != null && validMoves.any((Vector2 element) => element.x == coords.x && element.y == coords.y)) {
         movePiece(coords);
       }
@@ -444,7 +446,6 @@ class _RenderBoardState extends State<RenderBoard> {
               }
               return GestureDetector(
                   onTap: () {
-                    FlameAudio.play("place.mp3");
                     pieceSelected(Vector2(x, y));
                   },
                   child: widget.chessBoard.render(ChessBoardRenderParams(index: index, isOddBox: isOddBox, isSelected: selectedPiecePos.x == x && selectedPiecePos.y == y, chessPiece: chessPieces[x][y], isValidMove: isValidMove)));

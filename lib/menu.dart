@@ -1,7 +1,6 @@
 import 'package:chess/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 class IMenuTitle {
   final String title;
@@ -16,79 +15,45 @@ List<IMenuTitle> _titles = [
   callback: () {
     routers.goNamed(AppRoutes.game.name);
   }),
-  // IMenuOption(title: "Two Players", callback: () => print("hello")),
-  // IMenuOption(title: "Options", callback: () {}),
+  // IMenuTitle(title: "Two Players", callback: () => print("hello")),
+  // IMenuTitle(title: "Options", callback: () {}),
   IMenuTitle(title: "Quit", callback: () => SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop')),
 ];
 
-class MenuScreen extends StatefulWidget {
+class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
-
-  @override
-  State<MenuScreen> createState() => _MenuScreenState();
-}
-
-class _MenuScreenState extends State<MenuScreen> with SingleTickerProviderStateMixin {
-
-   late AnimationController parallexAnim;
-
-  @override
-  void initState() {
-    parallexAnim = AnimationController(
-        duration: const Duration(milliseconds: 250),
-        vsync: this,
-    );
-    super.initState();
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const MenuHeader(),
-          Center(
-            child: SizedBox(
-              width: 250,
-              child: ListView.separated(
-                    separatorBuilder: (context, index) => const SizedBox(height: 10,),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _titles.length,
-                    itemBuilder: (context, index) => MenuOption(option: _titles[index],),
-                  ),
+      body: Container(
+        decoration: const BoxDecoration(image: DecorationImage(image: AssetImage("assets/background/nature-min.png"),fit: BoxFit.fitHeight)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const MenuHeader(),
+            Center(
+              child: SizedBox(
+                width: 250,
+                child: ListView.separated(
+                      separatorBuilder: (context, index) => const SizedBox(height: 10,),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _titles.length,
+                      itemBuilder: (context, index) => MenuOption(option: _titles[index],),
+                    ),
+              ),
             ),
-          ),
-          Expanded(
-            child: Flow(delegate: BGParallexEffect(animation: parallexAnim), children: [
-              Image.asset("assets/background/background.png"),
-              Image.asset("assets/background/ground.png"),
-            ],),
-          )
-        ],
+            const Spacer()
+          ],
+        ),
       )
     );
   }
 }
 
-class BGParallexEffect extends FlowDelegate {
-
-  final Animation<double> animation;
-  BGParallexEffect({required this.animation}) : super(repaint: animation);
-  @override
-  void paintChildren(FlowPaintingContext context) {
-    context.paintChild(0, transform: Matrix4.translation(Vector3(0,10,90)));
-  }
-
-  @override
-  bool shouldRepaint(covariant BGParallexEffect oldDelegate) {
-    return animation != oldDelegate.animation;
-  }
-
-}
 
 class MenuOption extends StatelessWidget {
   final IMenuTitle option;

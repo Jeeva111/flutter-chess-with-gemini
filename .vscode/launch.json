@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define", "GEMINI_API_KEY=xxxxxx"
+            ],
+            "console": "debugConsole",
+        }
+    ]
+}

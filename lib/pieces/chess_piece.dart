@@ -107,6 +107,11 @@ class ChessPiece {
     }
     return data;
   }
+
+  static String moveCommandString({ChessPieceData? piece, required Vector2 from, required Vector2 to}) {
+    String moveCode = "${piece?.firstLetter}${intToChar(from.y)}${from.x}${intToChar(to.y)}${to.x}";
+    return moveCode;
+  }
 }
 
 interface class SplitData {
@@ -125,3 +130,4 @@ interface class SplitData {
 }
 
 int charToInt(String char) => char.codeUnitAt(0) - 'a'.codeUnitAt(0);
+String intToChar(int move) => String.fromCharCode('a'.codeUnitAt(0) + move);

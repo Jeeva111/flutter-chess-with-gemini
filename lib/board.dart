@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:chess/component/vector2.dart';
+import 'package:chess/generative_ai/gemini.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 
@@ -50,17 +53,13 @@ class _RenderBoardState extends State<RenderBoard> {
 
   bool isInBoard(Vector2 coords) => (coords.x >= 0 && coords.x < 8) && (coords.y >= 0 && coords.y < 8);
 
-  void _intializeBoard() {
+  void _intializeBoard() async {
     chessPieces = ChessPiece.generateChessPiece(widget.chessPieces);
     checkStatus = false;
     killedWhitePieces.clear();
     killedBlackPieces.clear();
     resetKingPos();
-    if(ChessPiece.commandToMove("Nb0a2") case (start: Vector2 start, move: Vector2 move)) {
-      selectedPiece = chessPieces[start.x][start.y];
-      selectedPiecePos = start;
-      movePiece(move);
-    }
+    String? firstMove = await Gemini.init();
   }
 
   // Calculate raw valid moves
@@ -293,51 +292,65 @@ class _RenderBoardState extends State<RenderBoard> {
 
   }
 
-  void movePiece(Vector2 coords) {
-
-    // if the new place has an enemy piece
-    if(chessPieces[coords.x][coords.y] != null) {
-      var capturedPiece = chessPieces[coords.x][coords.y];
-      if(capturedPiece!.isPlayer1) {
-        killedWhitePieces.add(capturedPiece);
-      } else {
-        killedBlackPieces.add(capturedPiece);
+  void movePiece(Vector2 coords) async {
+    try {
+      // if the new place has an enemy piece
+      if(chessPieces[coords.x][coords.y] != null) {
+        var capturedPiece = chessPieces[coords.x][coords.y];
+        if(capturedPiece!.isPlayer1) {
+          killedWhitePieces.add(capturedPiece);
+        } else {
+          killedBlackPieces.add(capturedPiece);
+        }
       }
-    }
 
-    chessPieces[coords.x][coords.y] = selectedPiece;
-    chessPieces[selectedPiecePos.x][selectedPiecePos.y] = null;
+      chessPieces[coords.x][coords.y] = selectedPiece;
+      chessPieces[selectedPiecePos.x][selectedPiecePos.y] = null;
 
-    if(selectedPiece!.type == ChessPieceType.king) {
-      if(selectedPiece!.isPlayer1) {
-        whitekingPos = coords.copyWith();
-      } else {
-        blackKingPos = coords.copyWith();
+      if(selectedPiece!.type == ChessPieceType.king) {
+        if(selectedPiece!.isPlayer1) {
+          whitekingPos = coords.copyWith();
+        } else {
+          blackKingPos = coords.copyWith();
+        }
       }
+
+      // see if any kings are under attack
+      checkStatus = isKingInCheck(!isWhiteTurn) ? true : false;
+      String playerMove = ChessPiece.moveCommandString(piece: selectedPiece, from: selectedPiecePos, to: coords);
+
+      setState(() {
+          selectedPiece = null;
+          selectedPiecePos.x = -1;
+          selectedPiecePos.y = -1;
+          validMoves = [];
+      });
+
+      // check if it's check mate
+      if(isCheckMate(!isWhiteTurn)) {
+        showDialog(context: context, builder: (context) => 
+          AlertDialog(title: const Text("Check mate"), 
+          actions: [
+            TextButton(onPressed: resetGame, child: const Text("Play again"))],));
+      }
+
+      // change turns to player 2
+      isWhiteTurn = !isWhiteTurn;
+      FlameAudio.play("place.mp3");
+      
+      String? gptMove = await Gemini.prompt(playerMove);
+      final jsonEncode = json.decode(gptMove??"");
+      if(!isWhiteTurn && jsonEncode.isNotEmpty) {
+        await Future.delayed(const Duration(seconds: 2));
+        if(ChessPiece.commandToMove(jsonEncode["black"]!) case (start: Vector2 start, move: Vector2 move)) {
+          selectedPiece = chessPieces[start.x][start.y];
+          selectedPiecePos = start;
+          movePiece(move);
+        }
+      }
+    } catch(err) {
+      print(err);
     }
-
-    // see if any kings are under attack
-    checkStatus = isKingInCheck(!isWhiteTurn) ? true : false;
-
-    setState(() {
-        selectedPiece = null;
-        selectedPiecePos.x = -1;
-        selectedPiecePos.y = -1;
-        validMoves = [];
-    });
-
-    // check if it's check mate
-    if(isCheckMate(!isWhiteTurn)) {
-      showDialog(context: context, builder: (context) => 
-        AlertDialog(title: const Text("Check mate"), 
-        actions: [
-          TextButton(onPressed: resetGame, child: const Text("Play again"))],));
-    }
-
-    // change turns to player 2
-    isWhiteTurn = !isWhiteTurn;
-    FlameAudio.play("place.mp3");
-
   }
 
   void resetGame() {

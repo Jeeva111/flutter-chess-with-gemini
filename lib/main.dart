@@ -1,6 +1,5 @@
 import 'package:chess/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter/services.dart';
 
 void main() {
@@ -8,20 +7,6 @@ void main() {
 }
 
 class Game extends StatelessWidget {
-
-  void testGemini() async {
-    const String apiKey = String.fromEnvironment("GEMINI_API_KEY");
-    final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
-    const prompt = 'Write a story about a magic backpack.';
-    print('Prompt: $prompt');
-    final content = [Content.text(prompt)];
-    final tokenCount = await model.countTokens(content);
-    print('Token count: ${tokenCount.totalTokens}');
-
-    final response = await model.generateContent(content);
-    print('Response:');
-    print(response.text);
-  }
   const Game({super.key});
 
   // This widget is the root of your application.
